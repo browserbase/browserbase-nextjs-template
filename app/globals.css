@@ -1,0 +1,212 @@
+@import "tailwindcss";
+
+:root {
+  /* Browserbase Brand Colors */
+  --bb-red: #f03603;
+  --bb-red-dark: #d23003;
+  --bb-off-white: #f9f6f4;
+  --bb-grey-200: #edebeb;
+  --bb-grey-600: #4a4848;
+  --bb-black: rgba(16, 13, 13, 1);
+  --bb-black-secondary: #1c1917;
+  --bb-green: #90c94d;
+  --bb-yellow: #f4ba41;
+  --bb-blue: #4da9e4;
+  --bb-grey-text: rgba(125, 125, 125, 1);
+  --bb-border: #e6e4e2;
+  --bb-border-hover: #100d0d;
+  --bb-focus-ring: #260f17;
+
+  /* Light mode (default) */
+  --background: #f9f6f4;
+  --foreground: rgba(16, 13, 13, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #1c1917;
+    --foreground: #f9f6f4;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-bb-red: var(--bb-red);
+  --color-bb-red-dark: var(--bb-red-dark);
+  --color-bb-off-white: var(--bb-off-white);
+  --color-bb-grey-200: var(--bb-grey-200);
+  --color-bb-grey-600: var(--bb-grey-600);
+  --color-bb-black: var(--bb-black);
+  --color-bb-green: var(--bb-green);
+  --color-bb-yellow: var(--bb-yellow);
+  --color-bb-blue: var(--bb-blue);
+  --color-bb-grey-text: var(--bb-grey-text);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Browserbase-style dot grid pattern */
+.bb-grid-pattern {
+  background-image: radial-gradient(circle, rgba(16, 13, 13, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Alternative: subtle line grid */
+.bb-line-grid {
+  background-image:
+    linear-gradient(to right, rgba(16, 13, 13, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(16, 13, 13, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Browserbase Pulse Animation */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(240, 54, 3, 0.4); }
+  50% { box-shadow: 0 0 16px 4px rgba(240, 54, 3, 0.6); }
+}
+
+.pulse-glow-red {
+  animation: pulse-glow 2s infinite;
+}
+
+/* Browserbase Focus Ring */
+.bb-focus:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #260f17;
+}
+
+.bb-focus:focus:not(:focus-visible) {
+  box-shadow: none;
+}
+
+.bb-focus:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #260f17;
+}
+
+/* Browserbase Button Base */
+.bb-btn {
+  border-radius: 2px;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.bb-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #260f17;
+}
+
+.bb-btn:focus:not(:focus-visible) {
+  box-shadow: none;
+}
+
+/* Browserbase Card Shadow */
+.bb-shadow {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Browserbase Modal Shadow */
+.bb-modal-shadow {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Browserbase Prose Styling */
+.prose ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+}
+
+.prose li {
+  padding-left: 0.25rem;
+}
+
+.prose li::marker {
+  color: #f03603;
+}
+
+.prose p:first-child {
+  margin-top: 0;
+}
+
+.prose p:last-child {
+  margin-bottom: 0;
+}
+
+/* Layout Transition Animations */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-up-enter {
+  animation: slideUp 0.4s ease-out forwards;
+}
+
+/* Staggered animation delays */
+.slide-up-delay-1 {
+  animation-delay: 0.1s;
+  opacity: 0;
+}
+
+.slide-up-delay-2 {
+  animation-delay: 0.2s;
+  opacity: 0;
+}
+
+/* Hero entrance animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.hero-title {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.hero-subtitle {
+  animation: fadeInUp 0.6s ease-out 0.1s forwards;
+  opacity: 0;
+}
+
+.hero-badges {
+  animation: fadeInUp 0.6s ease-out 0.2s forwards;
+  opacity: 0;
+}
+
+.hero-search {
+  animation: fadeInUp 0.6s ease-out 0.3s forwards;
+  opacity: 0;
+}
+
+/* Subtle hover effect for source badges */
+.source-badge {
+  transition: all 0.2s ease;
+}
+
+.source-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
