@@ -78,6 +78,8 @@ async function createStagehandSession(source: string): Promise<StagehandSession>
   const stagehand = new Stagehand({
     env: "BROWSERBASE",
     llmClient,
+    logger: console.log,
+    disablePino: true,
   });
 
   await stagehand.init();
