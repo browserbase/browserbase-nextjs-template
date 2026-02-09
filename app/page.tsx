@@ -23,6 +23,9 @@ export default function Home() {
     const q = searchQuery || query;
     if (!q.trim()) return;
 
+    // Set query first so results page doesn't redirect back
+    if (searchQuery) setQuery(searchQuery);
+
     resetResearch();
     router.push("/results");
 

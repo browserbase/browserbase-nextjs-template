@@ -7,6 +7,7 @@ interface ResearchContextType {
   query: string;
   setQuery: (query: string) => void;
   isResearching: boolean;
+  isSequentialMode: boolean;
   liveSessions: LiveSession[];
   status: StatusUpdate | null;
   findings: Finding[];
@@ -22,6 +23,7 @@ const ResearchContext = createContext<ResearchContextType | null>(null);
 export function ResearchProvider({ children }: { children: ReactNode }) {
   const [query, setQuery] = useState("");
   const [isResearching, setIsResearching] = useState(false);
+  const [isSequentialMode, setIsSequentialMode] = useState(false);
   const [liveSessions, setLiveSessions] = useState<LiveSession[]>([]);
   const [status, setStatus] = useState<StatusUpdate | null>(null);
   const [findings, setFindings] = useState<Finding[]>([]);
@@ -38,6 +40,7 @@ export function ResearchProvider({ children }: { children: ReactNode }) {
     setSummary(null);
     setError(null);
     setSessionTime(0);
+    setIsSequentialMode(false);
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -106,6 +109,9 @@ export function ResearchProvider({ children }: { children: ReactNode }) {
             const data = JSON.parse(line.slice(6));
 
             switch (eventType) {
+              case "mode":
+                setIsSequentialMode(data.isSequential);
+                break;
               case "liveViews":
                 setLiveSessions(data.sessions);
                 break;
@@ -146,6 +152,7 @@ export function ResearchProvider({ children }: { children: ReactNode }) {
         query,
         setQuery,
         isResearching,
+        isSequentialMode,
         liveSessions,
         status,
         findings,
