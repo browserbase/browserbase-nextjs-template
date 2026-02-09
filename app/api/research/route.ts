@@ -48,6 +48,24 @@ const gateway = createGateway({
 });
 
 /**
+ * Fetches the project's concurrency limit from Browserbase API
+ * Free plans have concurrency of 1, requiring sequential browser launches
+ * @returns The maximum number of concurrent sessions allowed
+ */
+async function getProjectConcurrency(): Promise<number> {
+  const response = await fetch(
+    `https://api.browserbase.com/v1/projects/${process.env.BROWSERBASE_PROJECT_ID}`,
+    {
+      headers: {
+        "x-bb-api-key": process.env.BROWSERBASE_API_KEY!,
+      },
+    }
+  );
+  const data = await response.json();
+  return data.concurrency ?? 1;
+}
+
+/**
  * Fetches the live view URL for a Browserbase session
  * @param sessionId - The Browserbase session ID
  * @returns The debugger fullscreen URL for live viewing
@@ -442,52 +460,106 @@ export async function POST(req: Request) {
 
   (async () => {
     const sessions: StagehandSession[] = [];
-    const sources = ["Search", "Wikipedia", "Hacker News", "YouTube", "News"];
+
+    // Research functions mapped to their source names
+    const researchFunctions = [
+      { source: "News", fn: researchGoogleNews },
+      { source: "Hacker News", fn: researchHackerNews },
+      { source: "YouTube", fn: researchYouTube },
+      { source: "Wikipedia", fn: researchWikipedia },
+      { source: "Search", fn: researchGoogle },
+    ];
 
     try {
-      await sendEvent("status", { message: "Starting 5 browser sessions...", phase: "init" });
-
-      // Create all 5 Stagehand sessions in parallel
-      const sessionPromises = sources.map(source => createStagehandSession(source));
-      const createdSessions = await Promise.all(sessionPromises);
-      sessions.push(...createdSessions);
-
-      // Send all live view URLs to frontend
-      await sendEvent("liveViews", {
-        sessions: sessions.map(s => ({
-          source: s.source,
-          liveViewUrl: s.liveViewUrl,
-          sessionId: s.sessionId,
-        })),
-      });
-
-      await sendEvent("status", { message: "Researching in parallel...", phase: "researching" });
+      // Check project concurrency to determine if we can run in parallel
+      const concurrency = await getProjectConcurrency();
+      const isSequential = concurrency === 1;
 
       const allFindings: Finding[] = [];
-
       const onFinding = (finding: Finding) => {
         allFindings.push(finding);
         sendEvent("findings", { findings: allFindings });
       };
 
-      // Run all research in parallel using Stagehand instances
-      await Promise.allSettled([
-        researchGoogle(sessions[0].stagehand, query,
-          (msg) => sendEvent("status", { message: msg, phase: "researching", source: "Search" }),
-          onFinding),
-        researchWikipedia(sessions[1].stagehand, query,
-          (msg) => sendEvent("status", { message: msg, phase: "researching", source: "Wikipedia" }),
-          onFinding),
-        researchHackerNews(sessions[2].stagehand, query,
-          (msg) => sendEvent("status", { message: msg, phase: "researching", source: "Hacker News" }),
-          onFinding),
-        researchYouTube(sessions[3].stagehand, query,
-          (msg) => sendEvent("status", { message: msg, phase: "researching", source: "YouTube" }),
-          onFinding),
-        researchGoogleNews(sessions[4].stagehand, query,
-          (msg) => sendEvent("status", { message: msg, phase: "researching", source: "News" }),
-          onFinding),
-      ]);
+      // Send mode info to frontend
+      await sendEvent("mode", {
+        isSequential,
+        concurrency,
+      });
+
+      if (isSequential) {
+        // Sequential mode for free plan (concurrency = 1)
+        await sendEvent("status", {
+          message: "Running browsers sequentially...",
+          phase: "init",
+        });
+
+        // Process each source one at a time
+        for (const { source, fn } of researchFunctions) {
+          await sendEvent("status", {
+            message: `Starting ${source} browser...`,
+            phase: "init",
+          });
+
+          const session = await createStagehandSession(source);
+          sessions.push(session);
+
+          // Send live view URL for this session
+          await sendEvent("liveViews", {
+            sessions: sessions.map(s => ({
+              source: s.source,
+              liveViewUrl: s.liveViewUrl,
+              sessionId: s.sessionId,
+            })),
+          });
+
+          // Run research for this source
+          await fn(
+            session.stagehand,
+            query,
+            (msg) => sendEvent("status", { message: msg, phase: "researching", source }),
+            onFinding
+          );
+
+          // Close session before starting next one
+          try {
+            await session.stagehand.close();
+          } catch {
+            // Session already closed
+          }
+        }
+      } else {
+        // Parallel mode for paid plans (concurrency > 1)
+        await sendEvent("status", { message: "Starting 5 browser sessions...", phase: "init" });
+
+        // Create all 5 Stagehand sessions in parallel
+        const sessionPromises = researchFunctions.map(({ source }) => createStagehandSession(source));
+        const createdSessions = await Promise.all(sessionPromises);
+        sessions.push(...createdSessions);
+
+        // Send all live view URLs to frontend
+        await sendEvent("liveViews", {
+          sessions: sessions.map(s => ({
+            source: s.source,
+            liveViewUrl: s.liveViewUrl,
+            sessionId: s.sessionId,
+          })),
+        });
+
+        await sendEvent("status", { message: "Researching in parallel...", phase: "researching" });
+
+        // Run all research in parallel using Stagehand instances
+        await Promise.allSettled(
+          researchFunctions.map(({ source, fn }, index) =>
+            fn(
+              sessions[index].stagehand,
+              query,
+              (msg) => sendEvent("status", { message: msg, phase: "researching", source }),
+              onFinding
+            )
+          )
+        );
+      }
 
       // Generate AI synthesis
       await sendEvent("status", {

@@ -13,6 +13,7 @@ import { useResearch } from "../context/ResearchContext";
 import Header from "../components/Header";
 import SearchBar from "../components/SearchBar";
 import ErrorBanner from "../components/ErrorBanner";
+import SequentialModeBanner from "../components/SequentialModeBanner";
 import LiveSessionsGrid from "../components/LiveSessionsGrid";
 import StatusBanner from "../components/StatusBanner";
 import ResearchResults from "../components/ResearchResults";
@@ -26,6 +27,7 @@ export default function Results() {
     query,
     setQuery,
     isResearching,
+    isSequentialMode,
     liveSessions,
     status,
     findings,
@@ -79,12 +81,16 @@ export default function Results() {
 
         {error && <ErrorBanner error={error} />}
 
+        <SequentialModeBanner isVisible={isSequentialMode && isResearching} />
+
         {(isResearching || liveSessions.length > 0) && (
           <LiveSessionsGrid
             liveSessions={liveSessions}
             sessionTime={sessionTime}
             formatTime={formatTime}
             onExpandSession={setExpandedSession}
+            isSequentialMode={isSequentialMode}
+            isResearching={isResearching}
           />
         )}
 
