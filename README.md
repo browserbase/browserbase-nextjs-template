@@ -44,7 +44,7 @@ An AI-powered research agent that runs **5 parallel browser sessions** to search
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/browserbase/research-agent-template
+git clone https://github.com/browserbase/browserbase-nextjs-template
 cd research-agent-template
 ```
 

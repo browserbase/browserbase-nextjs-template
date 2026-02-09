@@ -8,7 +8,8 @@
  * @see https://docs.browserbase.com
  */
 
-import { Stagehand, AISdkClient } from "@browserbasehq/stagehand";
+import { Stagehand } from "@browserbasehq/stagehand";
+import Browserbase from "@browserbasehq/sdk";
 import { z } from "zod";
 import { createGateway, generateObject } from "ai";
 
@@ -47,6 +48,9 @@ const gateway = createGateway({
   apiKey: process.env.AI_GATEWAY_API_KEY,
 });
 
+/** Browserbase SDK client for API calls */
+const browserbase = new Browserbase();
+
 /**
  * Fetches the project's concurrency limit from Browserbase API
  * Free plans have concurrency of 1, requiring sequential browser launches
@@ -71,16 +75,8 @@ async function getProjectConcurrency(): Promise<number> {
  * @returns The debugger fullscreen URL for live viewing
  */
 async function getLiveViewUrl(sessionId: string): Promise<string> {
-  const response = await fetch(
-    `https://api.browserbase.com/v1/sessions/${sessionId}/debug`,
-    {
-      headers: {
-        "x-bb-api-key": process.env.BROWSERBASE_API_KEY!,
-      },
-    }
-  );
-  const data = await response.json();
-  return data.debuggerFullscreenUrl;
+  const { debuggerFullscreenUrl } = await browserbase.sessions.debug(sessionId);
+  return debuggerFullscreenUrl;
 }
 
 /**
@@ -89,13 +85,9 @@ async function getLiveViewUrl(sessionId: string): Promise<string> {
  * @returns Stagehand session with live view URL
  */
 async function createStagehandSession(source: string): Promise<StagehandSession> {
-  const llmClient = new AISdkClient({
-    model: gateway("anthropic/claude-sonnet-4-20250514"),
-  });
-
   const stagehand = new Stagehand({
     env: "BROWSERBASE",
-    llmClient,
+    model: "gateway/anthropic/claude-sonnet-4-5",
     logger: console.log,
     disablePino: true,
   });
@@ -574,7 +566,7 @@ export async function POST(req: Request) {
           .join("\n\n---\n\n");
 
         const { object } = await generateObject({
-          model: gateway("anthropic/claude-sonnet-4-20250514"),
+          model: gateway("anthropic/claude-sonnet-4-5"),
           schema: ResearchSummarySchema,
           prompt: `Based on these research findings about "${query}", create a structured summary.
 
