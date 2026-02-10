@@ -11,7 +11,8 @@
 import { Stagehand } from "@browserbasehq/stagehand";
 import Browserbase from "@browserbasehq/sdk";
 import { z } from "zod";
-import { createGateway, generateObject } from "ai";
+import { generateObject } from "ai";
+import { anthropic } from "@ai-sdk/anthropic";
 
 /** Maximum execution time for this API route (in seconds) */
 export const maxDuration = 300;
@@ -30,7 +31,7 @@ type Finding = z.infer<typeof ResearchFindingSchema>;
 /** Schema for AI-generated research summary */
 const ResearchSummarySchema = z.object({
   overview: z.string().describe("2-3 sentence direct answer to the query with brief context"),
-  keyFacts: z.array(z.string()).min(3).max(6).describe("Specific facts with dates, numbers, or names"),
+  keyFacts: z.array(z.string()).describe("3-6 specific facts with dates, numbers, or names"),
   recentDevelopments: z.string().nullable().describe("Latest news or updates if applicable, null if none"),
   sourcesSummary: z.string().describe("Brief note on the types of sources consulted"),
 });
@@ -42,11 +43,6 @@ interface StagehandSession {
   liveViewUrl: string;
   source: string;
 }
-
-/** Gateway provider for AI calls via Vercel AI Gateway */
-const gateway = createGateway({
-  apiKey: process.env.AI_GATEWAY_API_KEY,
-});
 
 /** Browserbase SDK client for API calls */
 const browserbase = new Browserbase();
@@ -79,7 +75,7 @@ async function getLiveViewUrl(sessionId: string): Promise<string> {
 async function createStagehandSession(source: string): Promise<StagehandSession> {
   const stagehand = new Stagehand({
     env: "BROWSERBASE",
-    model: "gateway/anthropic/claude-sonnet-4-5",
+    model: "anthropic/claude-sonnet-4-5-20250929",
     logger: console.log,
     disablePino: true,
   });
@@ -558,7 +554,7 @@ export async function POST(req: Request) {
           .join("\n\n---\n\n");
 
         const { object } = await generateObject({
-          model: gateway("anthropic/claude-sonnet-4-5"),
+          model: anthropic("claude-sonnet-4-5-20250929"),
           schema: ResearchSummarySchema,
           prompt: `Based on these research findings about "${query}", create a structured summary.
 
