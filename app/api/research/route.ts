@@ -57,16 +57,8 @@ const browserbase = new Browserbase();
  * @returns The maximum number of concurrent sessions allowed
  */
 async function getProjectConcurrency(): Promise<number> {
-  const response = await fetch(
-    `https://api.browserbase.com/v1/projects/${process.env.BROWSERBASE_PROJECT_ID}`,
-    {
-      headers: {
-        "x-bb-api-key": process.env.BROWSERBASE_API_KEY!,
-      },
-    }
-  );
-  const data = await response.json();
-  return data.concurrency ?? 1;
+  const project = await browserbase.projects.retrieve(process.env.BROWSERBASE_PROJECT_ID!);
+  return project.concurrency ?? 1;
 }
 
 /**
