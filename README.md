@@ -4,6 +4,12 @@
 
 An AI-powered research agent that runs **5 parallel browser sessions** to search the web in real-time. Watch AI agents browse Google, Wikipedia, YouTube, Hacker News, and Google News simultaneously, then synthesize findings into a comprehensive summary.
 
+## Deploy
+
+Deploy this template to Vercel with one click. The Vercel Marketplace will automatically prompt you to set up Browserbase.
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fbrowserbase%2Fbrowserbase-nextjs-template&stores=%5B%7B%22type%22%3A%22integration%22%2C%22protocol%22%3A%22other%22%2C%22productSlug%22%3A%22browserbase%22%2C%22integrationSlug%22%3A%22browserbase%22%7D%5D)
+
 
 ## Features
 
