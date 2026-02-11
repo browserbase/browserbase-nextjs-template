@@ -89,6 +89,20 @@ export default function Home() {
               onSearch={() => handleSearch()}
             />
             <ExampleQueries onSelect={(example) => handleSearch(example)} />
+            <div className="mt-4 text-center">
+              <p className="text-sm text-[#969493] mb-3">
+                This demo can be easily deployed to Vercel using the Vercel Marketplace.
+              </p>
+              <a
+                href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fbrowserbase%2Fbrowserbase-nextjs-template&stores=%5B%7B%22type%22%3A%22integration%22%2C%22protocol%22%3A%22other%22%2C%22productSlug%22%3A%22browserbase%22%2C%22integrationSlug%22%3A%22browserbase%22%7D%5D"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-white border border-[#e6e4e2] text-sm text-[#4a4848] hover:border-[#000] hover:text-[#000] hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 cursor-pointer focus:outline-none focus:shadow-[0_0_0_3px_rgba(240,54,3,0.1)]"
+              >
+                <img src="/vercel-icon.svg" alt="Vercel" className="h-3.5 w-3.5" />
+                <span>Deploy</span>
+              </a>
+            </div>
           </div>
         </div>
       </main>
