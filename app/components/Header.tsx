@@ -6,15 +6,7 @@ export default function Header() {
           <img src="/browserbase-icon.svg" alt="Browserbase" className="w-8 h-8 rounded-sm" />
           <h1 className="text-xl font-semibold">AI Research Agent</h1>
         </div>
-        <a
-          href="https://www.browserbase.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 text-sm text-[#969493] hover:text-[#f03603] transition-colors"
-        >
-          <span>Powered by</span>
-          <img src="/browserbase.svg" alt="Browserbase" className="h-5" />
-        </a>
+<img src="/Browserbase-Vercel.png" alt="Browserbase + Vercel" className="h-8" />
       </div>
     </header>
   );
